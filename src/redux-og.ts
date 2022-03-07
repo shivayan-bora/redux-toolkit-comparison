@@ -19,7 +19,7 @@ interface CreateTodoAction {
     payload: Todo
 }
 
-export const createTodo = ({desc}: {
+export const createTodoActionCreator = ({desc}: {
     desc: string,
 }): CreateTodoAction => {
     return {
@@ -41,7 +41,7 @@ interface EditTodoAction {
     }
 }
 
-export const editTodo = ({id, desc}: {
+export const editTodoActionCreator = ({id, desc}: {
     id: string,
     desc: string,
 }): EditTodoAction => {
@@ -63,7 +63,7 @@ interface ToggleTodoAction {
     }
 }
 
-export const toggleTodo = ({id, isComplete}: {
+export const toggleTodoActionCreator = ({id, isComplete}: {
     id: string,
     isComplete: boolean,
 }): ToggleTodoAction => {
@@ -84,7 +84,7 @@ interface DeleteTodoAction {
     }
 }
 
-export const deleteTodo = ({id}: {
+export const deleteTodoActionCreator = ({id}: {
     id: string,
 }): DeleteTodoAction => {
     return {
@@ -101,7 +101,7 @@ interface SelectTodoAction {
     payload: { id: string }
 }
 
-export const selectTodo = ({id}: {
+export const selectTodoActionCreator = ({id}: {
     id: string,
 }): SelectTodoAction => {
     return {

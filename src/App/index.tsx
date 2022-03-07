@@ -8,7 +8,8 @@ import React, {
 import { useSelector, useDispatch } from "react-redux";
 import { State } from "../type";
 import "./App.css";
-import { createTodo, deleteTodo, editTodo, toggleTodo, selectTodo } from "../redux-og";
+// import { createTodoActionCreator, deleteTodoActionCreator, editTodoActionCreator, toggleTodoActionCreator, selectTodoActionCreator } from "../redux-og";
+import { createTodoActionCreator, deleteTodoActionCreator, editTodoActionCreator, toggleTodoActionCreator, selectTodoActionCreator } from "../redux-toolkit";
 
 
 const App = function() {
@@ -36,12 +37,12 @@ const App = function() {
   const handleCreateNewTodo = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if(!newTodoInput) return;
-    dispatch(createTodo({desc: newTodoInput}));
+    dispatch(createTodoActionCreator({desc: newTodoInput}));
     setNewTodoInput("");
   };
 
   const handleSelectTodo = (todoId: string) => (): void => {
-    dispatch(selectTodo({id: todoId}));
+    dispatch(selectTodoActionCreator({id: todoId}));
   };
 
   const handleEdit = (): void => {
@@ -63,7 +64,7 @@ const App = function() {
       handleCancelUpdate();
       return;
     };
-    dispatch(editTodo({id: selectedTodoId, desc: editTodoInput}));
+    dispatch(editTodoActionCreator({id: selectedTodoId, desc: editTodoInput}));
     setIsEditMode(false);
     setEditTodoInput("");
   };
@@ -79,13 +80,13 @@ const App = function() {
   const handleToggle = (): void => {
     if (!selectedTodoId || !selectedTodo) return;
 
-    dispatch(toggleTodo({id: selectedTodoId, isComplete
+    dispatch(toggleTodoActionCreator({id: selectedTodoId, isComplete
       : !selectedTodo.isComplete}));
   };
 
   const handleDelete = (): void => {
     if (!selectedTodoId) return;
-    dispatch(deleteTodo({id: selectedTodoId}));
+    dispatch(deleteTodoActionCreator({id: selectedTodoId}));
   };
 
   return (
