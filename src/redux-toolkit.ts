@@ -116,7 +116,7 @@ export const { select: selectTodoActionCreator } = selecetedTodoSlice.actions;
 
 // Combine all the reducers
 const reducers = {
-    // Take the slices and take the reducers
+    // For each slice,take their reducers
     todos: todosSlice.reducer,
     selectedTodo: selecetedTodoSlice.reducer,
     counter: counterSlice.reducer
