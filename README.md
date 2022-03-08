@@ -86,7 +86,7 @@ You can interact with your data by simply modifying it while keeping all the ben
 
 ### Redux Setup (Old Way)
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/521fe642-6919-42ca-9232-fcf332a4643b/Untitled.png)
+![Untitled](./images/1.png)
 
 **Action Types & Actions:**
 
@@ -340,7 +340,7 @@ In this case, you don’t need to create separate Action constants and Action cr
 
 **Old:**
 
-![Screenshot 2022-03-07 at 5.35.21 PM.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/a29d1210-4e92-43b7-95c7-35f5aacf6bf7/Screenshot_2022-03-07_at_5.35.21_PM.png)
+![Screenshot 2022-03-07 at 5.35.21 PM.png](./images/2.png)
 
 1. must provide initialState.
 2. must provide default case.
@@ -349,20 +349,116 @@ In this case, you don’t need to create separate Action constants and Action cr
 
 **New:**
 
-![Screenshot 2022-03-07 at 5.38.23 PM.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/b68e9852-8b8c-491b-8ba3-a62af51279cc/Screenshot_2022-03-07_at_5.38.23_PM.png)
+![Screenshot 2022-03-07 at 5.38.23 PM.png](./images/3.png)
 
 1. no initialState defined in `createSlice` and no default case.
 2. can optionally prepare your action.
 3. uses Immer to allow you to write `mutable` state logic.
 
-![Screenshot 2022-03-07 at 5.40.41 PM.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/61cf8c33-085d-4cf3-bc6e-2c65ba0d05e7/Screenshot_2022-03-07_at_5.40.41_PM.png)
+![Screenshot 2022-03-07 at 5.40.41 PM.png](./images/4.png)
 
-![Screenshot 2022-03-07 at 5.42.24 PM.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/91fb45ef-3582-44d2-ba44-6bf6a3ee7d61/Screenshot_2022-03-07_at_5.42.24_PM.png)
+![Screenshot 2022-03-07 at 5.42.24 PM.png](./images/5.png)
 
 ### Pitfalls of Immer:
 
-![Screenshot 2022-03-07 at 5.43.53 PM.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/ca2c511e-dbd7-4e6f-a3b0-63168067071c/Screenshot_2022-03-07_at_5.43.53_PM.png)
+![Screenshot 2022-03-07 at 5.43.53 PM.png](./images/6.png)
 
-![Screenshot 2022-03-07 at 5.44.02 PM.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/ecf4f4ed-28bc-4467-a605-e3d68f0aa00a/Screenshot_2022-03-07_at_5.44.02_PM.png)
+![Screenshot 2022-03-07 at 5.44.02 PM.png](./images/7.png)
 
 ### Handle async Logic using RTK
+1. Within your slice, have an error key in case your async call is rejected.
+    
+    ```jsx
+    interface RepoDetailsState {
+    	openIssuesCount: number;
+    	error: string | null
+    }
+    
+    const initialState: RepoDetailsState = {
+    	openIssuesCount: -1,
+    	error: null
+    }
+    ```
+    
+    Create reducers for both success and rejected state for the async call.
+    
+    ```jsx
+    const repoDetails = createSlice({
+    	name: 'repoDetails'
+    	initialState,
+    	reducers: {
+    		getRepoDetailsSuccess(state, action: PayloadAction<RepoDetails>) {
+    			state.openIssuesCount = action.payload.open_issues_count
+    			state.error = null
+    		},
+    		getRepoDetailsFailed(state, action: PayloadAction<string>) {
+    			state.openIssuesCount = -1
+    			state.error = action.payload
+    		}
+    	}
+    })
+    
+    export const {
+    	getRepoDetailsSuccess, 
+    	getRepoDetailsFailed
+    } = repoDetails.actions
+    ```
+    
+    Separately create your thunk function that either dispatches the success or the failed action.
+    
+    ```jsx
+    export const fetchIssuesCount = (
+    	org: string,
+    	repo: string
+    ): AppThunk => async dispatch => {
+    	try {
+    		const repoDetails = await getRepoDetails(org, repo)
+    		dispatch(getRepoDetailsSuccess(repoDetails))
+    	} catch(err) {
+    		dispatch(getRepoDetailsFailed(err))
+    	}
+    }
+    ```
+    
+2. We can also use `createAsyncThunk` to make thunk calls.
+    
+    ```jsx
+    import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+    import { userApi} from './userApi'
+    
+    // First Create the thunk
+    const fetchUserById = createAsyncThunk(
+    	'users/fetchIdByStatus',
+    	async (userId, thunkApi) => {
+    		const response = await userApi.fetchById(userId)
+    		return response.data
+    	}
+    )
+    ```
+    
+    This will generate 3 action types: 
+    
+    ```jsx
+    pending: 'users/requestStatus/pending'
+    fulfilled: 'users/requestStatus/fulfilled'
+    rejected: 'users/requestStatus/rejected'
+    ```
+    
+    We can then handle the actions in your reducers:
+    ```jsx
+    // Then handle the actions in your reducers
+    const usersSlice = createSlice({
+	    name: 'users',
+	    initialState: {entities: [], loading: 'idle'},
+	    reducers: {
+		    // Standard reducer logic, with auto generated actions
+	    },
+	    extraReducers: {
+		    // Add reducers for additional action types here, in this case from the thunk
+		    [fetchUsersById.fulfilled]: (state, action) => {
+			// Add user to the state array
+			state.entities.push(action.payload)
+		    }
+	    }
+    })
+    ```
